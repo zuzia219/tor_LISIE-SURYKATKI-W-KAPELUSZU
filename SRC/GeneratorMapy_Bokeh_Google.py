@@ -7,9 +7,8 @@ Created on Thu Apr 19 20:19:37 2018
 import random
 from bokeh.io import output_file, show
 from bokeh.models import ColumnDataSource, GMapOptions, HoverTool, TapTool, OpenURL
-from bokeh.plotting import gmap
+from bokeh.plotting import gmap, curdoc
 
-output_file("gmap.html")
 
 #ustalamy fokus mapy
 map_options = GMapOptions(lat=53.2900, lng=18.7000, map_type="roadmap", zoom=11)
@@ -45,4 +44,4 @@ taptool.callback = OpenURL(url=url)
 #dodajemy punkty na mapę
 p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
 
-#show(p)
+curdoc().add_root(p)
