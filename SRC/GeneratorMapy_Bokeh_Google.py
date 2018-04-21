@@ -17,36 +17,37 @@ from os import path
 df_tx = dl.read_transactions()
 df_views = dl.read_views()
 
-
-
+print(type(df_tx), type(df_views))
 #ustalamy fokus mapy (np na pierwszy punkt)
-#map_options = GMapOptions(lat=list(df_tx.loc[:1].latitude)[0], lng=list(df_tx.loc[:1].longitude)[0], map_type="roadmap", zoom=11)
 map_options = GMapOptions(lat=53.0, lng=18.6, map_type="roadmap", zoom=8)
 
-n_points  = 500
 categories_path = path.join('DATA','categories.csv')
 
-categories = pd.read_table(categories_path, names = ['id_kategorii', 'id_rodzica', 'nazwa'])
+categories = pd.read_table(categories_path, names = ['category_id', 'id_rodzica', 'nazwa'])
 
-#data_with_categories  = pd.merge(data, categories, left_on='category_id', right_on='id_kategorii') 
+print(categories.info())
 
+
+print(categories.columns)
+#data_with_categories  = df_tx.merge( categories, left_on='category_id', right_on='id_kategorii') 
+#data_with_categories  = df_tx.merge( categories) 
+#print(data_with_categories.head())
 
 source_transactions = ColumnDataSource(data={
-    'lon'       : df_tx['longitude'].loc[:1],
-    'lat'       : df_tx['latitude'].loc[:1],
     'category'  : df_tx['category_id'].loc[:1],
-    'ref'       : df_tx['offer_id'].loc[:1],
-    'imgs1':[
+    'lat'       : df_tx['latitude'].loc[:1],
+    'lon'       : df_tx['longitude'].loc[:1],
+    'quantity'  : df_tx['item_quantity'].loc[:1],
+    'imgs':[
         'https://image.flaticon.com/icons/svg/31/31624.svg',
     ]
 })
 
 source_views = ColumnDataSource(data={
-    'lon'       : df_views['longitude'].loc[:1],
-    'lat'       : df_views['latitude'].loc[:1],
     'category'  : df_views['category_id'].loc[:1],
-    'ref'       : df_views['offer_id'].loc[:1],
-    'imgs2':[
+    'lat'       : df_views['latitude'].loc[:1],
+    'lon'       : df_views['longitude'].loc[:1],
+    'imgs':[
         'https://image.flaticon.com/icons/svg/31/31624.svg',
     ]
 })
@@ -55,15 +56,16 @@ hover_tx = HoverTool(tooltips="""
     <div>
         <div>
             <img
-                src="@imgs1" height="30" alt="@imgs1" width="30"
+                src="@imgs" height="20" alt="@imgs" width="20"
                 style="float: left; margin: 0px 15px 15px 0px;"
                 border="2"
             ></img>
         </div>
         <div>
+            <span style="font-size: 14px; font-weight: bold;">lat: @lat</span><br>
+            <span style="font-size: 14px; font-weight: bold;">lon: @lon</span><br>
+            <span style="font-size: 14px; font-weight: bold;">pcs: @quantity</span><br>
             <span style="font-size: 14px; font-weight: bold;">category: @category</span><br>
-            <span style="font-size: 14px; font-weight: bold;">lat: @lat lon: @lon</span><br>
-            <span style="font-size: 14px; font-weight: bold;">offer_id: @ref</span>
         </div>
     </div>
     """
@@ -74,15 +76,15 @@ hover_views = HoverTool(tooltips="""
     <div>
         <div>
             <img
-                src="@imgs2" height="30" alt="@imgs2" width="30"
+                src="@imgs" height="20" alt="@imgs" width="20"
                 style="float: left; margin: 0px 15px 15px 0px;"
                 border="2"
             ></img>
         </div>
         <div>
+            <span style="font-size: 14px; font-weight: bold;">lat: @lat</span><br>
+            <span style="font-size: 14px; font-weight: bold;">lon: @lon</span><br>
             <span style="font-size: 14px; font-weight: bold;">category: @category</span><br>
-            <span style="font-size: 14px; font-weight: bold;">lat: @lat lon: @lon</span><br>
-            <span style="font-size: 14px; font-weight: bold;">offer_id: @ref</span>
         </div>
     </div>
     """
@@ -112,18 +114,23 @@ def update_plot_time(attr, old, new):
     #y_range
 
     data_slice = df_tx[(df_tx['ttimestamp']<(min_timestamp+yr)) & (df_tx['ttimestamp']>(min_timestamp-yr)) ].loc[:100]
+    imgs_transaction = ['https://image.flaticon.com/icons/svg/31/31624.svg' for _ in range(len(data_slice))]
     new_data_transactions = {
-       'lon'       : data_slice['longitude'],
-       'lat'       : data_slice['latitude'],
-       'category'  : data_slice['category_id']
+       'category'  : data_slice['category_id'],
+       'quantity'  : data_slice['item_quantity'],
+        'lat'       : data_slice['latitude'],
+        'lon'       : data_slice['longitude'],
+       'imgs'      : imgs_transaction
     }
     source_transactions.data = new_data_transactions
 
     data_slice = df_views[(df_views['ttimestamp']<(min_timestamp+yr)) & (df_views['ttimestamp']>(min_timestamp-yr)) ].loc[:100]
+    imgs_views = ['http://simpleicon.com/wp-content/uploads/basket.svg' for _ in range(len(data_slice))]
     new_data_views = {
-       'lon'       : data_slice['longitude'],
-       'lat'       : data_slice['latitude'],
-       'category'  : data_slice['category_id']
+       'category'  : data_slice['category_id'],
+        'lat'       : data_slice['latitude'],
+        'lon'       : data_slice['longitude'],
+       'imgs'      : imgs_views
     }
     source_views.data = new_data_views
 
