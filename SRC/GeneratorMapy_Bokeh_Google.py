@@ -15,7 +15,7 @@ from bokeh.layouts import column, row, widgetbox
 import pandas as pd
 import data_load as dl
 from os import path
-from datetime import date
+from datetime import date, datetime
 
 df_tx = dl.read_transactions()
 df_views = dl.read_views()
@@ -65,7 +65,6 @@ p.circle(x="lon", y="lat", size=10, fill_color="blue", fill_alpha=0.8, source=so
 def update_plot(attr, old, new):
     new_num = slider.value
     
-
     new_data=  dict(lat=list(df_tx.loc[:new_num].latitude),
                    lon=list(df_tx.loc[:new_num].longitude),
                    desc=["costam", "jeszcze cos", "co innego", "jakis tekst"],
@@ -91,7 +90,10 @@ def update_plot_2(attr, old, new):
 
 
 # Make a slider object: slider
-slider_time = DateSlider(start=date(2018, 4, 9), end=date.today(), step=1, value=date(2018, 4, 9), title='Date')
+min_timestamp = min(df_tx['ttimestamp'].min(), df_views['ttimestamp'].min())
+max_timestamp = max(df_tx['ttimestamp'].max(), df_views['ttimestamp'].max())
+
+slider_time = Slider(start=0, end=max_timestamp-min_timestamp, step=360, value=min_timestamp, title='Timestamp', format="{://360}")
 
 # Attach the callback to the 'value' property of slider
 slider_time.on_change('value', update_plot)
