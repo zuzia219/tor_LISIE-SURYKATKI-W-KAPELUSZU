@@ -10,6 +10,8 @@ from bokeh.models import Button, Slider
 from bokeh.models import ColumnDataSource, GMapOptions, HoverTool, TapTool, OpenURL
 from bokeh.plotting import gmap, curdoc
 from bokeh.layouts import column
+import pandas as pd
+import data_load as dl
 #output_file("gmap.html")
 
 
@@ -24,16 +26,26 @@ minLon = 15   #18
 maxLon = 20   #20
 
 # generujemy punkty (losowe na razie)
+'''
 source = ColumnDataSource(
     data=dict(lat=[random.uniform(minLat, maxLat) for x in range (0, number) for y in range(0, number)],
               lon=[random.uniform(minLon, maxLon) for x in range (0, number) for y in range(0, number)],
               desc=["costam", "jeszcze cos", "co innego", "jakis tekst"],
               ref=[random.randint(0,100) for x in range(0, 2) for y in range(0, number)])
 )
-    
+'''
+data = dl.read_transactions()
+
+source = ColumnDataSource(data={
+    'lon'       : data['longitude'].loc[:100],
+    'lat'       : data['latitude'].loc[:100],
+    'category' : data['category_id'].loc[:100],
+})
 #dodamy wskazowki przy naajechaniu myszą
 hover = HoverTool(tooltips=[
     ("desc", "@desc"),
+    ("lat", "@lat"),
+    ("lon", "@lon")
 ])
 
 #deklarujemy mapę

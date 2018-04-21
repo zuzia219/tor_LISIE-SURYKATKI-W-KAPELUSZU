@@ -2,9 +2,12 @@ import pandas as pd
 import numpy as np
 import json
 from datetime import datetime
+from os import path
 
-transactions = '../DATA/braincode-dataset-tx.json'
-views = '../DATA/braincode-dataset-items_no_c.json'
+
+
+transactions = path.join('DATA','braincode-dataset-tx.json')
+views = path.join('DATA','braincode-dataset-items_no_c.json')
 
 
 def read_views():
