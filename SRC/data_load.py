@@ -1,9 +1,13 @@
 import pandas as pd
 import numpy as np
 import json
+from datetime import datetime
+from os import path
 
-transactions = '../DATA/braincode-dataset-tx.json'
-views = '../DATA/braincode-dataset-items_no_c.json'
+
+
+transactions = path.join('DATA','braincode-dataset-tx.json')
+views = path.join('DATA','braincode-dataset-items_no_c.json')
 
 
 def read_views():
@@ -30,6 +34,8 @@ def read_views():
             json_to_dict['longitude'].append(json_location['longitude'])
 
         df = pd.DataFrame(json_to_dict)
+        df['ttimestamp'] = df['ttimestamp']/1000
+        df['date'] =df['ttimestamp'].apply(datetime.fromtimestamp)
 
     return df
 
@@ -60,6 +66,8 @@ def read_transactions():
             json_to_dict['item_quantity'].append(json_line['item_quantity'])
 
         df = pd.DataFrame(json_to_dict)
+        df['ttimestamp'] = df['ttimestamp']/1000
+        df['date'] = df['ttimestamp'].apply(datetime.fromtimestamp)
 
     return df
 
