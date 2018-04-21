@@ -23,9 +23,8 @@ df_views = dl.read_views()
 
 
 #ustalamy fokus mapy (np na pierwszy punkt)
-map_options = GMapOptions(lat=list(df_tx.loc[:1].latitude)[0], lng=list(df_tx.loc[:1].longitude)[0], map_type="roadmap", zoom=11)
+map_options = GMapOptions(lat=53.0, lng=18.6, map_type="roadmap", zoom=6)
 
-n_points  = 500
 categories_path = path.join('DATA','categories.csv')
 
 categories = pd.read_table(categories_path, names = ['id_kategorii', 'id_rodzica', 'nazwa'])
@@ -109,6 +108,7 @@ def update_plot_time(attr, old, new):
 # Make a slider object: slider
 min_timestamp = min(df_tx['ttimestamp'].min(), df_views['ttimestamp'].min())
 max_timestamp = max(df_tx['ttimestamp'].max(), df_views['ttimestamp'].max())
+print(min_timestamp)
 
 slider_time = Slider(start=0, end=max_timestamp-min_timestamp, step=3600, value=0, title='Timestamp', format="{://360}")
 
@@ -117,8 +117,20 @@ slider_time.on_change('value', update_plot_time)
 
 tab1 = Panel(child=p1, title="Map")
 
-p2 = figure(plot_width = 300, plot_height=300)
 
+#plot of favorite hours of buy
+p2 = figure(plot_width = 500, plot_height=500)
+
+bin_number = (lambda x: 96*(x-min_timestamp)//(max_timestamp - min_timestamp))
+df_tx['bin'] = df_tx['ttimestamp'].apply(bin_number) 
+df_tx_binned =  df_tx.groupby('bin').count()
+p2.line(df_tx_binned.index, df_tx_binned['ttimestamp'], legend = "transactions", color="blue")
+
+df_views['bin'] = df_views['ttimestamp'].apply(bin_number) 
+df_views_binned = df_views.groupby('bin').count()/100
+p2.line(df_views_binned.index, df_views_binned['ttimestamp'], legend = "views / 100", color="orange")
+
+p2.xaxis.axis_label = 'time [h]'
 tab2 = Panel(child=p2, title="Events count")
 
 tabs = Tabs(tabs=[tab1,tab2])
