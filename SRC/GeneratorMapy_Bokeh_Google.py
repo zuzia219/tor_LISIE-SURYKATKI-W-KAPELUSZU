@@ -6,7 +6,7 @@ Created on Thu Apr 19 20:19:37 2018
 """
 from bokeh.models.widgets import Panel, Tabs
 from bokeh.models import (Button, Slider,
-        ColumnDataSource,
+        ColumnDataSource, GMapOptions,
         HoverTool, TapTool, OpenURL)
 from bokeh.plotting import gmap, curdoc,figure
 from bokeh.layouts import row, widgetbox
@@ -21,7 +21,7 @@ df_views = dl.read_views()
 
 #ustalamy fokus mapy (np na pierwszy punkt)
 #map_options = GMapOptions(lat=list(df_tx.loc[:1].latitude)[0], lng=list(df_tx.loc[:1].longitude)[0], map_type="roadmap", zoom=11)
-#map_options = GMapOptions(lat=53.0, lng=18.6, map_type="roadmap", zoom=6)
+map_options = GMapOptions(lat=53.0, lng=18.6, map_type="roadmap", zoom=8)
 
 n_points  = 500
 categories_path = path.join('DATA','categories.csv')
