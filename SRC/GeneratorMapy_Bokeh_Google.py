@@ -4,18 +4,15 @@ Created on Thu Apr 19 20:19:37 2018
 
 @author: Andrew
 """
-import random
-from bokeh.io import output_file, show
 from bokeh.models.widgets import Panel, Tabs
 from bokeh.models import (Button, Slider,
-        ColumnDataSource, GMapOptions, 
+        ColumnDataSource,
         HoverTool, TapTool, OpenURL)
 from bokeh.plotting import gmap, curdoc,figure
-from bokeh.layouts import column, row, widgetbox
+from bokeh.layouts import row, widgetbox
 import pandas as pd
 import data_load as dl
 from os import path
-from datetime import date, datetime
 
 df_tx = dl.read_transactions()
 df_views = dl.read_views()
