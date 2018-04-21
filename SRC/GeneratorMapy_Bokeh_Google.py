@@ -13,11 +13,17 @@ from bokeh.layouts import column
 import pandas as pd
 import data_load as dl
 from os import path
+
+df_tx = dl.read_transactions()
+df_views = dl.read_views()
+
+
+
 #output_file("gmap.html")
 
 
-#ustalamy fokus mapy
-map_options = GMapOptions(lat=53.2900, lng=18.7000, map_type="roadmap", zoom=11)
+#ustalamy fokus mapy (np na pierwszy punkt)
+map_options = GMapOptions(lat=list(df_tx.loc[:100].latitude)[0], lng=list(df_tx.loc[:100].longitude)[0], map_type="roadmap", zoom=11)
 
 n_points  = 100
 categories_path = path.join('DATA','categories.csv')
@@ -33,6 +39,7 @@ source = ColumnDataSource(data={
     'lat'       : data['latitude'].loc[:n_points],
     'category' : data['category_id'].loc[:n_points],
 })
+
 #dodamy wskazowki przy naajechaniu myszą
 hover = HoverTool(tooltips=[
     ("desc", "@desc"),
@@ -45,21 +52,22 @@ hover = HoverTool(tooltips=[
 p = gmap("AIzaSyDfyuSoaKSveZClEteSEg8kPinO1fAdOc8", map_options, title="aaa", tools=[hover, 'pan', 'wheel_zoom', 'tap', 'box_zoom'])
 
 #dodamy url'y dla kliknięć na markery
-url = "http://allegro.pl/i@.html"
+url = "http://allegro.pl/i@ref.html"
 taptool = p.select(type=TapTool)
 taptool.callback = OpenURL(url=url)  
 
 #dodajemy punkty na mapę
-p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
+p.circle(x="lon", y="lat", size=12, fill_color="blue", fill_alpha=0.8, source=source)
 
 #funkcja zmieniajaca ilosc punktow (dla slidera)
 def update_plot(attr, old, new):
     new_num = slider.value
     
-    new_data=dict(lat=[random.uniform(minLat, maxLat) for x in range (0, new_num) for y in range(0, n_points)],
-                  lon=[random.uniform(minLon, maxLon) for x in range (0, new_num) for y in range(0, n_points)],
-                  desc=["costam", "jeszcze cos", "co innego", "jakis tekst"],
-                  ref=[random.randint(0,100) for x in range(0, 2) for y in range(0, new_num)])
+
+    new_data=  dict(lat=list(df_tx.loc[:100].latitude),
+                   lon=list(df_tx.loc[:100].longitude),
+                   desc=["costam", "jeszcze cos", "co innego", "jakis tekst"],
+                   ref=list(df_tx.loc[:100].offer_id))
     source.data = new_data
     p.title = str(new_num) + " punktow"
     
