@@ -13,6 +13,7 @@ from bokeh.layouts import column
 import pandas as pd
 import data_load as dl
 from os import path
+from datetime import date
 
 df_tx = dl.read_transactions()
 df_views = dl.read_views()
@@ -75,5 +76,32 @@ slider = Slider(start=1, end=100, value=n_points, step=1, title="numer of doots:
 slider.on_change('value', update_plot)
 
 curdoc().add_root(column(slider, p))
+
+#slider czasu
+# Define the callback function: update_plot
+def update_plot_2(attr, old, new):
+  # set the `yr` name to `slider.value` and `source.data = new_data`
+  yr = slider.value
+  new_data = {
+      #'x'       : data.loc[yr].fertility,
+      #'y'       : data.loc[yr].life,
+      #'country' : data.loc[yr].Country,
+      #'pop'     : (data.loc[yr].population / 20000000) + 2,
+      #'region'  : data.loc[yr].region,
+  }
+  source.data = new_data
+
+
+# Make a slider object: slider
+slider = Slider(start=date(2018, 4, 9), end=date.today(), step=1, value=(date(2018, 4, 9), date.today()), title='Date')
+
+# Attach the callback to the 'value' property of slider
+slider.on_change('value', update_plot)
+
+# Make a row layout of widgetbox(slider) and plot and add it to the current document
+curdoc().add_root(slider)
+#date_range_slider = DateRangeSlider(title="Date Range: ", start=date(2017, 1, 1), end=date.today(), value=(date(2017, 9, 7), date(2017, 10, 15)), step=1)
+#curdoc().add_root(column(date_range_slider))
+
 
 #show(p)
