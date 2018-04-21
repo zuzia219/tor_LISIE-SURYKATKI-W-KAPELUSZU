@@ -23,8 +23,10 @@ df_views = dl.read_views()
 
 
 #ustalamy fokus mapy (np na pierwszy punkt)
-map_options = GMapOptions(lat=53.0, lng=18.6, map_type="roadmap", zoom=6)
+#map_options = GMapOptions(lat=list(df_tx.loc[:1].latitude)[0], lng=list(df_tx.loc[:1].longitude)[0], map_type="roadmap", zoom=11)
+#map_options = GMapOptions(lat=53.0, lng=18.6, map_type="roadmap", zoom=6)
 
+n_points  = 500
 categories_path = path.join('DATA','categories.csv')
 
 categories = pd.read_table(categories_path, names = ['id_kategorii', 'id_rodzica', 'nazwa'])
@@ -36,35 +38,58 @@ source_transactions = ColumnDataSource(data={
     'lon'       : df_tx['longitude'].loc[:1],
     'lat'       : df_tx['latitude'].loc[:1],
     'category'  : df_tx['category_id'].loc[:1],
-    'ref'       : df_tx['offer_id'].loc[:1]
+    'ref'       : df_tx['offer_id'].loc[:1],
+    'imgs1':[
+        'https://image.flaticon.com/icons/svg/31/31624.svg',
+    ]
 })
 
 source_views = ColumnDataSource(data={
     'lon'       : df_views['longitude'].loc[:1],
     'lat'       : df_views['latitude'].loc[:1],
     'category'  : df_views['category_id'].loc[:1],
-    'ref'       : df_views['offer_id'].loc[:1]
+    'ref'       : df_views['offer_id'].loc[:1],
+    'imgs2':[
+        'https://image.flaticon.com/icons/svg/31/31624.svg',
+    ]
 })
+#dodamy wskazowki przy naajechaniu myszą
+hover_tx = HoverTool(tooltips="""
+    <div>
+        <div>
+            <img
+                src="@imgs1" height="30" alt="@imgs1" width="30"
+                style="float: left; margin: 0px 15px 15px 0px;"
+                border="2"
+            ></img>
+        </div>
+        <div>
+            <span style="font-size: 14px; font-weight: bold;">category: @category</span><br>
+            <span style="font-size: 14px; font-weight: bold;">lat: @lat lon: @lon</span><br>
+            <span style="font-size: 14px; font-weight: bold;">offer_id: @ref</span>
+        </div>
+    </div>
+    """
+)
 
 #dodamy wskazowki przy naajechaniu myszą
-hover_tx = HoverTool(names = ["tx"], 
-        tooltips=[
-    ("tx", ""),
-    ("lat", "@lat"),
-    ("lon", "@lon"),
-    ("category", "@category"),
-    ("ref", "@offer_id")
-])
-
-#dodamy wskazowki przy naajechaniu myszą
-hover_views = HoverTool(names = ["views"], 
-        tooltips=[
-    ("views", ""),
-    ("lat", "@lat"),
-    ("lon", "@lon"),
-    ("category", "@category"),
-    ("ref", "@offer_id")
-])
+hover_views = HoverTool(tooltips="""
+    <div>
+        <div>
+            <img
+                src="@imgs2" height="30" alt="@imgs2" width="30"
+                style="float: left; margin: 0px 15px 15px 0px;"
+                border="2"
+            ></img>
+        </div>
+        <div>
+            <span style="font-size: 14px; font-weight: bold;">category: @category</span><br>
+            <span style="font-size: 14px; font-weight: bold;">lat: @lat lon: @lon</span><br>
+            <span style="font-size: 14px; font-weight: bold;">offer_id: @ref</span>
+        </div>
+    </div>
+    """
+)
 
 #deklarujemy mapę
 p1 = gmap("AIzaSyDfyuSoaKSveZClEteSEg8kPinO1fAdOc8", map_options, title="Views and transactions", tools=[hover_tx, hover_views, 'pan', 'wheel_zoom', 'tap', 'box_zoom'])
@@ -108,7 +133,6 @@ def update_plot_time(attr, old, new):
 # Make a slider object: slider
 min_timestamp = min(df_tx['ttimestamp'].min(), df_views['ttimestamp'].min())
 max_timestamp = max(df_tx['ttimestamp'].max(), df_views['ttimestamp'].max())
-print(min_timestamp)
 
 slider_time = Slider(start=0, end=max_timestamp-min_timestamp, step=3600, value=0, title='Timestamp', format="{://360}")
 
@@ -117,8 +141,6 @@ slider_time.on_change('value', update_plot_time)
 
 tab1 = Panel(child=p1, title="Map")
 
-
-#plot of favorite hours of buy
 p2 = figure(plot_width = 500, plot_height=500)
 
 bin_number = (lambda x: 96*(x-min_timestamp)//(max_timestamp - min_timestamp))
@@ -131,6 +153,7 @@ df_views_binned = df_views.groupby('bin').count()/100
 p2.line(df_views_binned.index, df_views_binned['ttimestamp'], legend = "views / 100", color="orange")
 
 p2.xaxis.axis_label = 'time [h]'
+
 tab2 = Panel(child=p2, title="Events count")
 
 tabs = Tabs(tabs=[tab1,tab2])
