@@ -25,7 +25,7 @@ df_views = dl.read_views()
 #ustalamy fokus mapy (np na pierwszy punkt)
 map_options = GMapOptions(lat=list(df_tx.loc[:100].latitude)[0], lng=list(df_tx.loc[:100].longitude)[0], map_type="roadmap", zoom=11)
 
-n_points  = 100
+n_points  = 500
 categories_path = path.join('DATA','categories.csv')
 
 data = dl.read_transactions()
@@ -37,7 +37,8 @@ categories = pd.read_table(categories_path, names = ['id_kategorii', 'id_rodzica
 source = ColumnDataSource(data={
     'lon'       : data['longitude'].loc[:n_points],
     'lat'       : data['latitude'].loc[:n_points],
-    'category' : data['category_id'].loc[:n_points],
+    'category'  : data['category_id'].loc[:n_points],
+    'ref'       : data['offer_id'].loc[:n_points]
 })
 
 #dodamy wskazowki przy naajechaniu myszą
@@ -45,7 +46,8 @@ hover = HoverTool(tooltips=[
     ("desc", "@desc"),
     ("lat", "@lat"),
     ("lon", "@lon"),
-    ("category", "@category")
+    ("category", "@category"),
+    ("ref", "@offer_id")
 ])
 
 #deklarujemy mapę
@@ -54,20 +56,20 @@ p = gmap("AIzaSyDfyuSoaKSveZClEteSEg8kPinO1fAdOc8", map_options, title="aaa", to
 #dodamy url'y dla kliknięć na markery
 url = "http://allegro.pl/i@ref.html"
 taptool = p.select(type=TapTool)
-taptool.callback = OpenURL(url=url)  
+taptool.callback = OpenURL(url=url)
 
 #dodajemy punkty na mapę
-p.circle(x="lon", y="lat", size=12, fill_color="blue", fill_alpha=0.8, source=source)
+p.circle(x="lon", y="lat", size=10, fill_color="blue", fill_alpha=0.8, source=source)
 
 #funkcja zmieniajaca ilosc punktow (dla slidera)
 def update_plot(attr, old, new):
     new_num = slider.value
     
 
-    new_data=  dict(lat=list(df_tx.loc[:100].latitude),
-                   lon=list(df_tx.loc[:100].longitude),
+    new_data=  dict(lat=list(df_tx.loc[:new_num].latitude),
+                   lon=list(df_tx.loc[:new_num].longitude),
                    desc=["costam", "jeszcze cos", "co innego", "jakis tekst"],
-                   ref=list(df_tx.loc[:100].offer_id))
+                   ref=list(df_tx.loc[:new_num].offer_id))
     source.data = new_data
     p.title = str(new_num) + " punktow"
     
